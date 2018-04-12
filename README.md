@@ -63,3 +63,7 @@ This section performs topictiling on the features obtained from topic models don
 ```
 python3 makeCableNews.py --topictile num_topics_50 input_text
 ```
+
+### References
+- http://jgibblda.sourceforge.net/
+- https://github.com/riedlma/topictiling
