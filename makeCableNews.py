@@ -37,8 +37,9 @@ def makedata():
         sentence = ' '.join(word for word in words)
         file.write(sentence+'\n')
     file.close()
+
 def lda():
-    for i in range(50,700,10):
+    for i in range(60,700,10):
         print (subprocess.call(['sudo','java','-mx512M','-cp','bin:lib/args4j-2.0.6.jar','jgibblda.LDA','-est','-alpha', str(50/i),'-beta', str(0.1),'-ntopics', str(i),'-niters', str(1000),'-savestep',str(1000),'-dir','.','-dfile','example.txt']))
         folder_name = 'num_topics_'+str(i)
         os.mkdir(folder_name);
@@ -46,12 +47,23 @@ def lda():
         for j in files:
             shutil.move(j, folder_name)
         shutil.move('wordmap.txt',folder_name)
-        print("Completed model with topics: "+i)
+        print("Completed model with topics: "+str(i))
+
+def topictile(num_topics,input_file):
+    if not os.path.exists('output'):
+        os.mkdir('output');
+    print(subprocess.call(['sh','topictiling.sh','-ri','5','-tmd',num_topics,'-tmn','model-final','-fp',input_file+'.txt','-fd','files_to_segment','-out','output/'+num_topics+'.txt']))
+
 if __name__== "__main__":
-    FUNCTION_MAP = {'makedata' : makedata,
-                'LDA' : lda }
-    parser = argparse.ArgumentParser(description="This program has multiple functions: \n\nMakedata: Prepares Data for LDA.\nLDA: Does topic modeling and stores the values in folders. \nTopictile: Performs topic tiling on the folder specified.",formatter_class=RawTextHelpFormatter)
-    parser.add_argument('command', choices=FUNCTION_MAP.keys())
+    parser = argparse.ArgumentParser(description="This program has multiple functions: \n\nMakedata: Prepares Data for LDA .\nLDA: Does topic modeling and stores the values in folders. \nTopictile: Performs topic tiling on the folder specified.",formatter_class=RawTextHelpFormatter)
+    parser.add_argument("--makedata", help="Prepares Data for LDA",action="store_true")
+    parser.add_argument("--LDA", help="Does topic modeling and stores the values in folders",action="store_true")
+    parser.add_argument("--topictile",nargs=2, help="Performs topic tiling on the folder specified")
     args = parser.parse_args()
-    func = FUNCTION_MAP[args.command]
-    func()
+    if args.makedata:
+        makedata()
+    if args.LDA:
+        lda()
+    if args.topictile:
+        topictile(args.topictile[0],args.topictile[1])
+
