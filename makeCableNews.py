@@ -65,9 +65,17 @@ def topictileBatch(num_topics,pathToStore):
     for example in os.listdir(pathToStore):
         print(example)
         print(subprocess.call(['sh','topictiling.sh','-ri','5','-tmd',num_topics,'-tmn','model-final','-fp',example,'-fd',pathToStore,'-out',output_folder+"/"+example]))
+
 def ldaTrainAgain(topictileModel,niter,):
     print (subprocess.call(['sudo','java','-Xmx2048m','-cp','bin:lib/args4j-2.0.6.jar','jgibblda.LDA','-estc','-dir',topictileModel,'-model','model-final','-niters',niter]))
     print("Training completed")
+
+def ldaInference(model_name,niter,newFile):
+    if not os.path.exists(model_name):
+        os.makedir(model_name)
+    if not os.path.exists(model_name+'/'+newFile):
+        shutil.move(newFile, model_name)
+    print (subprocess.call(['sudo','java','-Xmx2048m','-cp','bin:lib/args4j-2.0.6.jar','jgibblda.LDA','-inf','-dir',model_name,'-model', 'model-final','-niters', niter,'-dfile',str(newFile)]))
 
 if __name__== "__main__":
     parser = argparse.ArgumentParser(description="This program has multiple functions: \n\nMakedata: Prepares Data for LDA .\nLDA: Does topic modeling and stores the values in folders. \nTopictile: Performs topic tiling on the folder specified.",formatter_class=RawTextHelpFormatter)
@@ -75,7 +83,8 @@ if __name__== "__main__":
     parser.add_argument("--LDA", help="Does topic modeling and stores the values in folders",action="store_true")
     parser.add_argument("--topictile",nargs=2, help="Performs topic tiling on the folder specified")
     parser.add_argument("--topictilebatch",nargs=2, help="Performs topic tiling on the folder specified")
-    parser.add_argument("--ldaTrainAgain",nargs=2, help="Performs topic tiling on the folder specified")
+    parser.add_argument("--ldaTrainAgain",nargs=2, help="Performs topic modeling on pre-trained model")
+    parser.add_argument("--ldaInference",nargs=3, help="Performs topic modeling on new data but with existing models")
     args = parser.parse_args()
     if args.makedata:
         makedata()
@@ -87,4 +96,6 @@ if __name__== "__main__":
         topictileBatch(args.topictilebatch[0],args.topictilebatch[1])
     if args.ldaTrainAgain:
         ldaTrainAgain(args.ldaTrainAgain[0],args.ldaTrainAgain[1])
+    if args.ldaInference:
+        ldaInference(args.ldaInference[0],args.ldaInference[1],args.ldaInference[2])
 
