@@ -48,10 +48,10 @@ python3 makeCableNews.py --makedata
 This will parse all text files in the path specified in the program and format it accordingly. The file is stored as **example.txt**
 
 ### Topic Modeling using Latent Dirichlet Allocation (LDA)
-The input file from the previous step is passed to the topic modelling program. Topic modelling is an unsupervised approach. This code runs for topics starting from 50 to 700 and stores them in the format **num_topics_[number]** folders.
+The input file from the previous step is passed to the topic modelling program. Topic modelling is an unsupervised approach. This code runs for topics starting from minTopics to maxTopics and stores them in the format **num_topics_[number]** folders.
 #### Running the code:
 ```
-python3 makeCableNews.py --LDA
+python3 makeCableNews.py --LDA 50 200
 ```
 ### Topic Tiling from Topic Models
 This section performs topictiling on the features obtained from topic models done in the previous step. Fix the number of topics that is deemed appropriate. Topic Tiling reads the input file contained in the folder **files_to_segment**. The code also stores the output file in a folder called **output**. Topic tiling requires two positional arguments
