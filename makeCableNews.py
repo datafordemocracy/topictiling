@@ -42,8 +42,8 @@ def makedata():
         file.write(sentence+'\n')
     file.close()
 
-def lda():
-    for i in range(240,260,10):
+def lda(min,max):
+    for i in range(min,max,10):
         print (subprocess.call(['sudo','java','-Xmx2048m','-cp','bin:lib/args4j-2.0.6.jar','jgibblda.LDA','-est','-alpha', str(50/i),'-beta', str(0.1),'-ntopics', str(i),'-niters', str(1000),'-savestep',str(1000),'-dir','.','-dfile','example.txt']))
         folder_name = 'num_topics_'+str(i)
         os.mkdir(folder_name);
@@ -66,19 +66,27 @@ def topictileBatch(num_topics,pathToStore):
         print(example)
         print(subprocess.call(['sh','topictiling.sh','-ri','5','-tmd',num_topics,'-tmn','model-final','-fp',example,'-fd',pathToStore,'-out',output_folder+"/"+example]))
 
+def ldaTrainAgain(topictileModel,niter,):
+    print (subprocess.call(['sudo','java','-Xmx2048m','-cp','bin:lib/args4j-2.0.6.jar','jgibblda.LDA','-estc','-dir',topictileModel,'-model','model-final','-niters',niter]))
+    print("Training completed")
+
+
 if __name__== "__main__":
     parser = argparse.ArgumentParser(description="This program has multiple functions: \n\nMakedata: Prepares Data for LDA .\nLDA: Does topic modeling and stores the values in folders. \nTopictile: Performs topic tiling on the folder specified.",formatter_class=RawTextHelpFormatter)
     parser.add_argument("--makedata", help="Prepares Data for LDA",action="store_true")
-    parser.add_argument("--LDA", help="Does topic modeling and stores the values in folders",action="store_true")
+    parser.add_argument("--LDA",nargs=2, help="Does topic modeling and stores the values in folders",action="store_true")
     parser.add_argument("--topictile",nargs=2, help="Performs topic tiling on the folder specified")
     parser.add_argument("--topictilebatch",nargs=2, help="Performs topic tiling on the folder specified")
+    parser.add_argument("--ldaTrainAgain",nargs=2, help="Performs topic modeling on pre-trained model")
     args = parser.parse_args()
     if args.makedata:
         makedata()
     if args.LDA:
-        lda()
+        lda(args.LDA[0],args.LDA[1])
     if args.topictile:
         topictile(args.topictile[0],args.topictile[1])
     if args.topictilebatch:
         topictileBatch(args.topictilebatch[0],args.topictilebatch[1])
+    if args.ldaTrainAgain:
+        ldaTrainAgain(args.ldaTrainAgain[0],args.ldaTrainAgain[1])
 
