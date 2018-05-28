@@ -1,7 +1,7 @@
 # /usr/local/bin/python
 """
 Author : Gautam Somappa
-The program does topictiling on cable news for the data democracy project.
+The program processes data/implements LDA/performs topictiling on cable news for the data democracy project.
 """
 
 import argparse
@@ -18,9 +18,12 @@ from nltk.stem.porter import PorterStemmer
 from string import punctuation
 import subprocess
 from argparse import RawTextHelpFormatter
-path = "/Users/gautam/Box Sync/presidency_project/cablenews/data/*/*.txt"
+path = "/Users/gautam/Box Sync/presidency_project/cablenews/data/*/*.txt" # Change the path to the folder in your system
 
 def makedata():
+    '''
+    This function reads files specified in path and formats it so it can be used by LDA.
+    '''
     final_data = {}
     count=0
     stop_words = stopwords.words('english')
@@ -43,6 +46,10 @@ def makedata():
     file.close()
 
 def lda(min,max):
+    '''
+    Given the min number of topics and max number of topics, this will perform LDA and store the parameters 
+    in folders with the name num_topic_<<topic number>>
+    '''
     for i in range(min,max,10):
         print (subprocess.call(['sudo','java','-Xmx2048m','-cp','bin:lib/args4j-2.0.6.jar','jgibblda.LDA','-est','-alpha', str(50/i),'-beta', str(0.1),'-ntopics', str(i),'-niters', str(1000),'-savestep',str(1000),'-dir','.','-dfile','example.txt']))
         folder_name = 'num_topics_'+str(i)
@@ -54,11 +61,17 @@ def lda(min,max):
         print("Completed model with topics: "+str(i))
 
 def topictile(num_topics,input_file):
+    '''
+    perform topictiling on just one file and store the output in a folder called 'output'
+    '''
     if not os.path.exists('output'):
         os.mkdir('output');
     print(subprocess.call(['sh','topictiling.sh','-ri','5','-tmd',num_topics,'-tmn','model-final','-fp',input_file+'.txt','-fd','files_to_segment','-out','output/'+num_topics+'.txt']))
 
 def topictileBatch(num_topics,pathToStore):
+    '''
+    perform topictiling on all files in a folder and store the results in a folder called 'output_<<Topic Number>>'
+    '''
     output_folder = 'output_'+num_topics
     if not os.path.exists(output_folder):
         os.mkdir(output_folder);
@@ -66,7 +79,10 @@ def topictileBatch(num_topics,pathToStore):
         print(example)
         print(subprocess.call(['sh','topictiling.sh','-ri','5','-tmd',num_topics,'-tmn','model-final','-fp',example,'-fd',pathToStore,'-out',output_folder+"/"+example]))
 
-def ldaTrainAgain(topictileModel,niter,):
+def ldaTrainAgain(topictileModel,niter):
+    '''
+    Retrain your parameters: This function requires the model to be retrained and the number of interations.
+    '''
     print (subprocess.call(['sudo','java','-Xmx2048m','-cp','bin:lib/args4j-2.0.6.jar','jgibblda.LDA','-estc','-dir',topictileModel,'-model','model-final','-niters',niter]))
     print("Training completed")
 
